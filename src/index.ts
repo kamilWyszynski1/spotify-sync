@@ -8,11 +8,13 @@ import dotenv from "dotenv";
 import SpotifyWebApi from "spotify-web-api-node";
 import { router as userRouter } from "./routes/movement";
 import cors from "cors";
+import { createClient } from "redis";
 
 const log: Logger = createLogger("index");
 dotenv.config();
 const app = express();
 const port = 5000;
+const redisClient = createClient("6379");
 
 app.use(express.json());
 app.use(cors());
@@ -25,8 +27,8 @@ const spotifyApi = new SpotifyWebApi({
 });
 
 app.use("/test", testRouter);
-app.use("/callback", spotifyAuthRouter(spotifyApi));
-app.use("/spotify", spotifyClientRouter(spotifyApi));
+app.use("/callback", spotifyAuthRouter(spotifyApi, redisClient));
+app.use("/spotify", spotifyClientRouter(spotifyApi, redisClient));
 app.use("/user", userRouter);
 
 const scopes = [
