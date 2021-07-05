@@ -25,13 +25,17 @@ async function spotifyClientFromRedis(
   try {
     const reply = await getAsync(key);
 
-    logger.info(`spotifyClientFromRedis: reply value: ${reply}`);
+    logger.info(
+      `spotifyClientFromRedis: reply for key: ${key} value: ${reply}`
+    );
     if (reply == "" || reply == null) {
       throw new Error("no saved credentials for given key");
     }
     const keys: SpotifyCredentials = JSON.parse(reply);
 
     return new SpotifyWebApi({
+      clientId: process.env.SPOTIFY_CLIENT_ID,
+      clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
       accessToken: keys.accessToken,
       refreshToken: keys.refreshToken,
     });

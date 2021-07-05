@@ -1,7 +1,10 @@
 <template>
   <div class="hello"></div>
-  <div>{{ userName }}</div>
-  <div>{{ users }}</div>
+  <div>{{ displayName }}</div>
+  <img :src="imgURL" />
+
+  <button v-on:click="getCurrentTrack">get current track</button>
+  <div>listening to: {{ currentTrack }}</div>
 </template>
 
 <script>
@@ -14,18 +17,56 @@ export default {
   },
   data() {
     return {
-      userName: "",
-      users: [],
+      key: "",
+      displayName: "",
+      imgURL: "",
+      currentTrack: "",
     };
   },
   created() {
-    axios.post("http://localhost:5000/user").then((data) => {
-      this.userName = data.data.user;
-    });
+    if (localStorage.getItem("key") == null) {
+      axios.post("http://localhost:5000/user/join").then((data) => {
+        console.log(data);
+        localStorage.setItem("key", data.data.key);
+        window.location.href = unescape(data.data.uri);
+      });
+    }
 
-    axios.get("http://localhost:5000/user").then((data) => {
-      this.users = data.data.users;
-    });
+    if (localStorage.getItem("key") != null) {
+      axios
+        .get("http://localhost:5000/spotify/me", {
+          headers: { "spotify-key": localStorage.getItem("key") },
+        })
+        .then((data) => {
+          console.log(data);
+          this.displayName = data.data.display_name;
+          this.imgURL = data.data.img_url;
+        });
+    }
+  },
+  beforeMount() {
+    let urlParams = new URLSearchParams(window.location.search);
+    console.log(urlParams.get("code")); // "MyParam"
+    const code = urlParams.get("code");
+
+    if (code != null) {
+      axios.get(
+        `http://localhost:5000/callback?code=${code}&key=${localStorage.getItem(
+          "key"
+        )}`
+      );
+    }
+  },
+  methods: {
+    getCurrentTrack() {
+      axios
+        .get(`http://localhost:5000/spotify/current`, {
+          headers: { "spotify-key": localStorage.getItem("key") },
+        })
+        .then((data) => {
+          console.log(data);
+        });
+    },
   },
 };
 </script>

@@ -17,24 +17,25 @@ const getUsers = (req: Request, resp: Response) => {
   resp.status(200).send({ users: users });
 };
 
-const join = (req: Request, resp: Response) => {
-  const spotifyApi = new SpotifyWebApi({
-    clientId: process.env.SPOTIFY_CLIENT_ID,
-    clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-    redirectUri: `http://localhost:5000/callback`,
-  });
+const join = (
+  spotify: SpotifyWebApi
+): ((req: Request, resp: Response) => void) => {
+  return async (req: Request, resp: Response) => {
+    const scopes = [
+      "user-read-private",
+      "user-read-email",
+      "user-read-recently-played",
+      "user-read-currently-playing",
+      "user-modify-playback-state",
+      "user-read-playback-state",
+    ];
+    const state = "state";
 
-  const scopes = [
-    "user-read-private",
-    "user-read-email",
-    "user-read-recently-played",
-    "user-read-currently-playing",
-    "user-modify-playback-state",
-    "user-read-playback-state",
-  ];
-  const state = "state";
-
-  resp.status(200).send({ uri: spotifyApi.createAuthorizeURL(scopes, state) });
+    resp.status(200).send({
+      uri: spotify.createAuthorizeURL(scopes, state),
+      key: generateName(12),
+    });
+  };
 };
 
 function generateName(length: number): string {

@@ -1,4 +1,4 @@
-import { Logger } from "winston";
+import { Logger, loggers } from "winston";
 import createLogger from "../utils/logger";
 import { Request, Response } from "express";
 import SpotifyWebApi from "spotify-web-api-node";
@@ -12,8 +12,7 @@ const spotifyAuth = (
 ): ((req: Request, resp: Response) => void) => {
   return (req: Request, resp: Response) => {
     const code: string = (req.query as any).code;
-
-    const hash: string = generateHash(12);
+    const key: string = (req.query as any).key;
 
     // Retrieve an access token and a refresh token
     spotify.authorizationCodeGrant(code).then(
@@ -22,9 +21,9 @@ const spotifyAuth = (
         console.log("The access token is " + data.body["access_token"]);
         console.log("The refresh token is " + data.body["refresh_token"]);
 
-        logger.info(`writing access keys to redis`);
+        logger.info(`writing access keys to redis for hash: ${key}`);
         redisClient.set(
-          hash,
+          key,
           JSON.stringify({
             accessToken: data.body["access_token"],
             refreshToken: data.body["refresh_token"],
@@ -33,7 +32,7 @@ const spotifyAuth = (
             if (err) {
               resp.status(500).send({ msg: "failed to authenticate" });
             } else {
-              resp.status(200).send({ key: hash });
+              resp.status(200).send({ key: key });
             }
           }
         );

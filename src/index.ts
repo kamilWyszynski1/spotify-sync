@@ -6,7 +6,7 @@ import spotifyClientRouter from "./routes/spotify";
 import createLogger from "./utils/logger";
 import dotenv from "dotenv";
 import SpotifyWebApi from "spotify-web-api-node";
-import { router as userRouter } from "./routes/movement";
+import userRouter from "./routes/movement";
 import cors from "cors";
 import { createClient } from "redis";
 
@@ -23,13 +23,13 @@ app.use(cors());
 const spotifyApi = new SpotifyWebApi({
   clientId: process.env.SPOTIFY_CLIENT_ID,
   clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-  redirectUri: "http://localhost:5000/callback",
+  redirectUri: "http://localhost:8080/callback",
 });
 
 app.use("/test", testRouter);
 app.use("/callback", spotifyAuthRouter(spotifyApi, redisClient));
 app.use("/spotify", spotifyClientRouter(redisClient));
-app.use("/user", userRouter);
+app.use("/user", userRouter(spotifyApi));
 
 log.info("starting server");
 
