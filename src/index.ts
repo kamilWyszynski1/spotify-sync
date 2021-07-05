@@ -28,30 +28,20 @@ const spotifyApi = new SpotifyWebApi({
 
 app.use("/test", testRouter);
 app.use("/callback", spotifyAuthRouter(spotifyApi, redisClient));
-app.use("/spotify", spotifyClientRouter(spotifyApi, redisClient));
+app.use("/spotify", spotifyClientRouter(redisClient));
 app.use("/user", userRouter);
-
-const scopes = [
-  "user-read-private",
-  "user-read-email",
-  "user-read-recently-played",
-  "user-read-currently-playing",
-  "user-modify-playback-state",
-  "user-read-playback-state",
-];
-const state = "state";
-
-log.info(spotifyApi.createAuthorizeURL(scopes, state));
 
 log.info("starting server");
 
-app.listen(port, () => log.info(`Running on port ${port}`));
-
 process.once("SIGUSR2", function () {
-  process.kill(process.pid, "SIGUSR2");
+  process.exit();
 });
 
 process.on("SIGINT", function () {
   // this is only called on ctrl+c, not restart
-  process.kill(process.pid, "SIGINT");
+  // process.kill(process.pid, "SIGINT");
+  log.info("killing process on CTRL+C");
+  process.exit();
 });
+
+app.listen(port, () => log.info(`Running on port ${port}`));

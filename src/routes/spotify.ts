@@ -11,11 +11,11 @@ import {
 
 const router = express.Router();
 
-export default (spotify: SpotifyWebApi, redisClient: RedisClient): Router => {
-  router.get("/recent_tracks", getRecentTracks(spotify));
-  router.get("/current", getCurrentlyPlaying(spotify));
-  router.get("/track/:id", getTrackByID(spotify));
-  router.put("/player", changePlayerState(spotify));
-  router.get("/me", getUserData(spotify));
+export default (redisClient: RedisClient): Router => {
+  router.get("/recent_tracks", getRecentTracks(redisClient));
+  router.get("/current", getCurrentlyPlaying(redisClient));
+  router.get("/track/:id", getTrackByID(redisClient));
+  router.put("/player", changePlayerState(redisClient));
+  router.get("/me", getUserData(redisClient));
   return router;
 };

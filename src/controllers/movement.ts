@@ -5,7 +5,6 @@ import createLogger from "../utils/logger";
 
 const logger = createLogger("controller:movement");
 let users: Array<string> = new Array<string>();
-const redisClient = createClient("6379");
 
 const addUser = (req: Request, resp: Response) => {
   const userName: string = generateName(6);
